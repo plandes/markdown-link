@@ -37,8 +37,7 @@
 (require 'markdown-mode)
 
 (defconst markdown-link-regex-link
-  (concat "\\[\\([a-zA-Z0-9@#$%^&*()[:space:]-]+?\\)\\]"
-	  "\\(?:(\\([a-zA-Z0-9@#$%^&*[:space:]-]+?\\))\\)?"))
+  "\\[\\([a-zA-Z0-9@#$%^&*()[:space:]-]+?\\)\\]\\(?:(\\([^)]+\\))\\)?")
 
 (defvar markdown-link-last-buffer nil
   "The most recent markdown  buffer to report on links.")
@@ -57,14 +56,15 @@
 			  (let ((match (match-string ix)))
 			    (when match
 			      (substring-no-properties match))))
-			'(1 2 3))
+			'(1 2))
 	  (funcall (lambda (matches)
 		     (unless (save-excursion
 			       (goto-char (1+ (match-end 1)))
 			       (looking-at ":"))
 		       matches)))
 	  (funcall (lambda (matches)
-		     (list :ref (subst-char-in-string ?\n ? (nth 0 matches))
+		     (list :ref (replace-regexp-in-string
+				 "[ \r\v\t\n]+" " " (nth 0 matches))
 			   :link (nth 1 matches)
 			   :begin (match-beginning 0)
 			   :end (match-end 0))))
@@ -75,18 +75,21 @@
 
 (defun markdown-link-definitions ()
   "Get all link definitions."
-  (->> (markdown-get-defined-references)
-       (-map (lambda (arg)
-	       (let* ((ref (car arg))
-		      (def (markdown-reference-definition ref)))
-		 (list :ref ref
-		       ;:line (cdr arg)
-		       :definition (nth 0 def)
-		       :begin (save-excursion
-				(goto-char (nth 1 def))
-				(beginning-of-line)
-				(point))
-		       :end (nth 2 def)))))))
+  (let (matches)
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward markdown-regex-reference-definition nil t)
+	(->> (list :ref (substring-no-properties (match-string 2))
+		   :definition (substring-no-properties (match-string 5))
+		   :begin (match-beginning 0)
+		   :end (save-excursion
+			  (goto-char (match-beginning 0))
+			  (end-of-line)
+			  (point)))
+	     (list)
+	     (append matches)
+	     (setq matches))))
+    matches))
 
 (defun markdown-link-diffs ()
   "Report on missing, used and undefined links."
@@ -103,6 +106,7 @@
 	    :undefined (cl-set-difference no-links defs :test #'cmp-refs)
 	    :unused (cl-set-difference defs entries :test #'cmp-refs)))))
 
+;;;###autoload
 (defun markdown-link-report (&optional buffer)
   "Report on missing, used and undefined links in BUFFER."
   (interactive)
@@ -117,6 +121,11 @@
 					     (:unused "unused definition")
 					     (:undefined "undefined reference")
 					     (_ (error "Unknown key: %s" key)))
+					   (funcall
+					    (lambda (type)
+					      (format "%s: '%s'"
+						      type
+						      (plist-get plist :ref))))
 					   (plist-put plist :message)))
 				    (plist-get diffs key))))
 		      (apply #'append)
