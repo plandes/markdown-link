@@ -55,7 +55,7 @@
   :prefix "markdown-link-")
 
 (defconst markdown-link-regex-link
-  "\\[\\([a-zA-Z0-9@#$%^&*()_[:space:]-]+?\\)\\]\\(?:(\\([^)]+\\))\\)?")
+  "\\[\\([a-zA-Z0-9@#$%^&*()<>|+,_[:space:]-.]+?\\)\\]\\(?:(\\([^)]+\\))\\)?")
 
 (defcustom markdown-link-regex-url "^https?"
   "The regular expression used to identify URLs to check in references."
