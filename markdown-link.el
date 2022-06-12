@@ -45,7 +45,7 @@
   :prefix "markdown-link-")
 
 (defconst markdown-link-regex-link
-  "\\[\\([a-zA-Z0-9@#$%^&*()[:space:]-]+?\\)\\]\\(?:(\\([^)]+\\))\\)?")
+  "\\[\\([a-zA-Z0-9@#$%^&*()_[:space:]-]+?\\)\\]\\(?:(\\([^)]+\\))\\)?")
 
 (defcustom markdown-link-regex-url "^https?"
   "The regular expression used to identify URLs to check in references."
@@ -80,13 +80,17 @@
 	  (funcall (lambda (matches)
 		     (unless (save-excursion
 			       (goto-char (1+ (match-end 1)))
-			       (looking-at ":"))
+			       (let ((bdiff (- (match-beginning 0)
+					       (save-excursion
+						 (beginning-of-line)
+						 (point)))))
+				 (and (looking-at ":") (= bdiff 0))))
 		       matches)))
 	  (funcall (lambda (matches)
 		     (list :ref (replace-regexp-in-string
 				 "[ \r\v\t\n]+" " " (nth 0 matches))
 			   :link (nth 1 matches)
-			   :link-begin (match-beginning 1)
+			   :link-begin (match-beginning 2)
 			   :begin (match-beginning 0)
 			   :end (match-end 0))))
 	  (list)

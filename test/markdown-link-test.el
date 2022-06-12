@@ -14,10 +14,10 @@
   (save-current-buffer
     (set-buffer (find-file-noselect "test.md"))
     (->> '((:ref "full link" :link "#here-partial\nurl"
-		 :link-begin 142 :begin 141 :end 171)
-	   (:ref "undefined reference" :link nil :link-begin 234
+		 :link-begin 153 :begin 141 :end 171)
+	   (:ref "undefined reference" :link nil :link-begin nil
 		 :begin 233 :end 254)
-	   (:ref "a defined reference" :link nil :link-begin 582
+	   (:ref "a defined reference" :link nil :link-begin nil
 		 :begin 581 :end 602))
 	 (equal (markdown-link-entries))
 	 (should))))
@@ -51,7 +51,7 @@
   (save-current-buffer
     (set-buffer (find-file-noselect "test.md"))
     (should (equal '((:ref "undefined reference"
-			   :link nil :link-begin 234
+			   :link nil :link-begin nil
 			   :begin 233 :end 254))
 		   (plist-get (markdown-link-diffs) :undefined)))))
 
