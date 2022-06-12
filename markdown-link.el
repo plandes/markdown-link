@@ -29,6 +29,16 @@
 ;;; Commentary:
 
 ;; Report on missing, invalid, used and undefined links and references.
+;;
+;; This library report on missing on used and undefined links in [markdown]
+;; formatted files.  It finds the following issues:
+;;
+;; * Bracketed references without links are provided without link definitions.
+;; * Unused link definitions where links are defined but never used.
+;; * Invalid link URLs.
+;;
+;; When the report is run with `markdown-link-report', a compilation buffer is
+;; created with each line an error/issue with the markdown document.
 
 ;;; Code:
 
