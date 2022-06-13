@@ -67,6 +67,11 @@
   :group 'markdown-link
   :type 'boolean)
 
+(defcustom markdown-link-skip-code t
+  "Whether to skip reporting on references found in code, including blocks."
+  :group 'markdown-link
+  :type 'boolean)
+
 (defcustom markdown-link-url-timeout-seconds 5
   "The timeout for URL validity checks."
   :group 'markdown-link
@@ -76,17 +81,34 @@
 (define-compilation-mode markdown-link-mode "Markdown Link"
   (set (make-local-variable 'compilation-disable-input) t))
 
+(defun markdown-link-invalid-code-ref-p (str)
+  "Return whether string STR is valid markdown code.
+
+It does this by looking at the face font of the first character of text.  For
+this reason, if the buffer is not fontified, this test fails.  It always
+returns t when `markdown-link-skip-code' is nil."
+  (not (and markdown-link-skip-code
+	    (->> (get-text-property 0 'face str)
+		 (funcall (lambda (arg)
+			    (if (consp arg)
+				arg
+			      (list arg))))
+		 (memq 'markdown-code-face)))))
+
 (defun markdown-link-entries ()
   "Report on missing, used and undefined links."
   (let (entries)
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward markdown-link-regex-link nil t)
-	(-some->> (-map (lambda (ix)
-			  (let ((match (match-string ix)))
-			    (when match
-			      (substring-no-properties match))))
-			'(1 2))
+	(-some->>
+	    (->> '(1 2)
+		 (-map (lambda (ix)
+			 (let ((match (match-string ix)))
+			   (when (and match
+				      (markdown-link-invalid-code-ref-p match))
+			     (substring-no-properties match)))))
+		 (-filter #'identity))
 	  (funcall (lambda (matches)
 		     (unless (save-excursion
 			       (goto-char (1+ (match-end 1)))
@@ -149,6 +171,7 @@ message is OK."
 		       (list :text))))
 	    (if (buffer-live-p resp-buf)
 		(let ((buffer-modified-p nil))
+		  (ignore buffer-modified-p)
 		  (kill-buffer resp-buf))))))
     (error (->> (error-message-string err)
 		(format "URL access: %s")
