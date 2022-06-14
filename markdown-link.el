@@ -270,7 +270,7 @@ in DIFFS, which is obtained by the `markdown-link-diffs' function."
 	(set-buffer (set-buffer (get-buffer-create "*Markdown Link Report*")))
 	(read-only-mode 0)
 	(erase-buffer)
-	(insert "Markdown Link Report:\n\n")
+	(insert (format "Markdown Link Report: %s\n\n" (buffer-name buffer)))
 	(->> issues
 	     (-map (lambda (plist)
 		     (with-current-buffer buffer
