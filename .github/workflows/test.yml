@@ -4,35 +4,37 @@ on:
   pull_request:
   push:
     paths-ignore:
-      - '**.md'
-      - 'doc/*'
+    - '**.md'
+    - 'doc/*'
     branches:
-      - master
+    - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10']
+        emacs_version:
+          - 27.1
     steps:
-      - name: Checkout reposistory
-        uses: actions/checkout@v2.4.0
-        with:
-          submodules: recursive
+    - name: Checkout reposistory
+      uses: actions/checkout@v2.4.0
+      with:
+        submodules: recursive
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+        architecture: 'x64'
 
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+    - uses: purcell/setup-emacs@master
+      with:
+        version: ${{ matrix.emacs_version }}
 
-      - name: Prepare tests
-        run: 'make info deps'
+    - name: Setup Cask
+      uses: conao3/setup-cask@master
+      with:
+        version: 'snapshot'
 
-      - name: Run tests
-        run: 'make test'
-        env:
-          NO_TEST_MULTI_PROC_PIDS: 1
+    - name: Run tests
+      run: 'make test'
