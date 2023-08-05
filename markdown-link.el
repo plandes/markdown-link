@@ -1,8 +1,8 @@
 ;;; markdown-link.el --- Report on missing, used and undefined links  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022 Paul Landes
+;; Copyright (C) 2022 - 2023 Paul Landes
 
-;; Version: 0.1
+;; Version: 0.2
 ;; Author: Paul Landes
 ;; Maintainer: Paul Landes
 ;; Keywords: markdown files
