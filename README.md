@@ -4,7 +4,7 @@
 [![MELPA stable badge][melpa-stable-badge]][melpa-stable-link]
 [![Build Status][build-badge]][build-link]
 
-This library report on missing on used and undefined links in [markdown]
+This library reports on missing on used and undefined links in [markdown]
 formatted files.  It finds the following issues:
 
 * Bracketed references without links are provided without link definitions.
@@ -17,7 +17,7 @@ created with each line an error/issue with the markdown document.
 
 ## License
 
-Copyright (c) 2022 Paul Landes
+Copyright (c) 2023 Paul Landes
 
 GNU Lesser General Public License, Version 2.0
 
